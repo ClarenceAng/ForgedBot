@@ -1,7 +1,7 @@
 const { Rcon } = require("rcon-client");
 require("dotenv").config();
 const mcIP = process.env.MC_IP;
-const discordChannelId = "866548058220920835";
+const discordChannelId = "1409934238907891805";
 
 module.exports = async (bot) => {
   const rcon = new Rcon({
