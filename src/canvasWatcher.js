@@ -42,7 +42,12 @@ module.exports = (client) => {
           // Send to all channels
           channelIds.forEach((id) => {
             const channel = client.channels.cache.get(id.trim());
-            channel?.send({ embeds: [embed] });
+            if (channel) {
+              channel.send({
+                content: "@everyone",
+                embeds: [embed],
+              });
+            }
           });
         });
       }
