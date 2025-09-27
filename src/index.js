@@ -13,6 +13,7 @@ const clientId = process.env.BOT_ID;
 const guildId = process.env.GUILD_ID;
 const token = process.env.DISCORD_TOKEN;
 const mcLogger = require("./mcLogger.js");
+const canvasWatcher = require("./canvasWatcher.js");
 
 const client = new Client({
   intents: [
@@ -29,6 +30,7 @@ const client = new Client({
 client.on("ready", (c) => {
   console.log(`${c.user.username} started!`);
   mcLogger(client);
+  canvasWatcher(client);
 });
 
 const commands = [

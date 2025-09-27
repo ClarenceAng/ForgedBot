@@ -4,19 +4,42 @@ const mcIP = process.env.MC_IP;
 const discordChannelId = "1409934238907891805";
 
 module.exports = async (bot) => {
-  const rcon = new Rcon({
-    host: mcIP,
-    port: 25575,
-    password: process.env.RCON_PASSWORD,
-  });
+  let rcon;
+  let connected = false;
 
-  await rcon.connect();
-  console.log("Connected to Minecraft server via RCON");
+  async function connectRcon() {
+    try {
+      rcon = new Rcon({
+        host: mcIP,
+        port: 25575,
+        password: process.env.RCON_PASSWORD,
+      });
+
+      await rcon.connect();
+      connected = true;
+      console.log("✅ Connected to Minecraft server via RCON");
+
+      // Reconnect if connection closes
+      rcon.on("end", () => {
+        console.log("🔌 RCON disconnected. Retrying in 5s...");
+        connected = false;
+        setTimeout(connectRcon, 5000);
+      });
+    } catch (err) {
+      console.error("⚠️ Failed to connect to RCON:", err.message);
+      connected = false;
+      setTimeout(connectRcon, 5000); // retry after 5s
+    }
+  }
+
+  // start trying to connect right away
+  connectRcon();
 
   let previousPlayers = [];
 
-  // Poll every 5 seconds
   setInterval(async () => {
+    if (!connected || !rcon) return; // don’t poll if RCON isn’t ready
+
     try {
       const response = await rcon.send("list");
       const onlinePlayers =
@@ -46,7 +69,9 @@ module.exports = async (bot) => {
 
       previousPlayers = onlinePlayers;
     } catch (err) {
-      console.error("Error polling Minecraft server:", err);
+      console.error("Error polling Minecraft server:", err.message);
+      connected = false;
+      setTimeout(connectRcon, 5000); // try reconnecting if polling fails
     }
-  }, 1000);
+  }, 5000); // poll every 5s
 };
