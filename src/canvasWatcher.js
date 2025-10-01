@@ -25,9 +25,10 @@ module.exports = (client) => {
       const data = await res.json();
 
       // Only new announcements since last check
-      const newAnnouncements = data.filter(
-        (ann) => new Date(ann.posted_at) > lastChecked
-      );
+      const newAnnouncements = data.filter((ann) => {
+        const ts = new Date(ann.posted_at || ann.created_at);
+        return ts > lastChecked;
+      });
 
       if (newAnnouncements.length > 0) {
         newAnnouncements.forEach((ann) => {
